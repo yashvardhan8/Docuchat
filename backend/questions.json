@@ -1,0 +1,17 @@
+[
+  {
+    "question": "What is the work-from-home policy?",
+    "expected_answer": "Employees can work remotely up to 3 days per week, subject to manager approval.",
+    "source": "company_handbook.pdf"
+  },
+  {
+    "question": "How many paid leaves are provided per year?",
+    "expected_answer": "18 paid leaves per year.",
+    "source": "employee_handbook.pdf"
+  },
+  {
+    "question": "What is the notice period for resignation?",
+    "expected_answer": "See document for exact notice period.",
+    "source": "employee_handbook.pdf"
+  }
+]
