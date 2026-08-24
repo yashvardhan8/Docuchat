@@ -1,4 +1,5 @@
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://docuchat-otyk.onrender.com";
+
 
 async function handleResponse(res) {
   if (!res.ok) {
