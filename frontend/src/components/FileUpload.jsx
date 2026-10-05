@@ -9,8 +9,10 @@ export default function FileUpload({ onUploaded }) {
 
   async function handleFile(file) {
     if (!file) return;
+
     setError(null);
     setIsUploading(true);
+
     try {
       const result = await uploadDocument(file);
       onUploaded(result);
@@ -24,35 +26,75 @@ export default function FileUpload({ onUploaded }) {
   return (
     <div>
       <div
-        className={`dropzone ${isDragging ? "dropzone-active" : ""}`}
+        className={`dropzone ${isDragging ? "dropzone-active" : ""} ${
+          isUploading ? "dropzone-uploading" : ""
+        }`}
         onDragOver={(e) => {
           e.preventDefault();
-          setIsDragging(true);
+          if (!isUploading) setIsDragging(true);
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={(e) => {
           e.preventDefault();
           setIsDragging(false);
-          handleFile(e.dataTransfer.files[0]);
+
+          if (!isUploading) {
+            handleFile(e.dataTransfer.files[0]);
+          }
         }}
-        onClick={() => inputRef.current?.click()}
+        onClick={() => {
+          if (!isUploading) {
+            inputRef.current?.click();
+          }
+        }}
       >
         <input
           ref={inputRef}
           type="file"
           accept=".pdf,.docx"
           hidden
-          onChange={(e) => handleFile(e.target.files[0])}
+          onChange={(e) => {
+            handleFile(e.target.files[0]);
+            e.target.value = "";
+          }}
         />
+
         {isUploading ? (
-          <p>Uploading & indexing…</p>
+          <>
+            <div className="upload-icon uploading-icon">
+              <span></span>
+            </div>
+
+            <p className="dropzone-title">
+              Processing document...
+            </p>
+
+            <p className="dropzone-sub">
+              Uploading and creating your document index
+            </p>
+          </>
         ) : (
           <>
-            <p className="dropzone-title">Drop a PDF or DOCX here</p>
-            <p className="dropzone-sub">or click to browse</p>
+            <div className="upload-icon">
+              <span>↑</span>
+            </div>
+
+            <p className="dropzone-title">
+              Upload a document
+            </p>
+
+            <p className="dropzone-sub">
+              Drag & drop or click to browse
+            </p>
+
+            <div className="supported-files">
+              <span>PDF</span>
+              <span>DOCX</span>
+            </div>
           </>
         )}
       </div>
+
       {error && <p className="error-text">{error}</p>}
     </div>
   );

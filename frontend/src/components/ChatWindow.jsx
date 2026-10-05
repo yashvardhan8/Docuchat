@@ -15,6 +15,7 @@ export default function ChatWindow({ hasDocuments }) {
 
   async function handleSend() {
     const question = input.trim();
+
     if (!question || isLoading) return;
 
     if (!hasDocuments) {
@@ -23,17 +24,31 @@ export default function ChatWindow({ hasDocuments }) {
     }
 
     setError(null);
-    const userMsg = { role: "user", content: question };
-    const history = messages.map((m) => ({ role: m.role, content: m.content }));
+
+    const userMsg = {
+      role: "user",
+      content: question,
+    };
+
+    const history = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
     try {
       const result = await askQuestion(question, history);
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: result.answer, sources: result.sources },
+        {
+          role: "assistant",
+          content: result.answer,
+          sources: result.sources,
+        },
       ]);
     } catch (e) {
       setError(e.message);
@@ -49,36 +64,142 @@ export default function ChatWindow({ hasDocuments }) {
     }
   }
 
+  function useSuggestion(question) {
+    setInput(question);
+  }
+
   return (
     <div className="chat-window">
+      <div className="chat-topbar">
+        <div>
+          <h2>Document Assistant</h2>
+          <p>Ask questions and get answers grounded in your documents.</p>
+        </div>
+
+        <div className="ai-status">
+          <span></span>
+          AI Ready
+        </div>
+      </div>
+
       <div className="chat-messages">
-        {messages.length === 0 && (
-          <p className="empty-state">
-            {hasDocuments
-              ? "Ask a question about your uploaded documents."
-              : "Upload a document to get started."}
-          </p>
+        {messages.length === 0 ? (
+          <div className="welcome-screen">
+            <div className="welcome-icon">✦</div>
+
+            <h1>
+              {hasDocuments
+                ? "Ask your documents anything."
+                : "Welcome to DocuChat"}
+            </h1>
+
+            <p>
+              {hasDocuments
+                ? "Your documents are ready. Ask a question and I'll find the relevant information."
+                : "Upload a PDF or DOCX to start chatting with your documents."}
+            </p>
+
+            {hasDocuments && (
+              <div className="suggestion-grid">
+                <button
+                  onClick={() =>
+                    useSuggestion("Give me a summary of this document")
+                  }
+                >
+                  <span>✦</span>
+                  Summarize this document
+                </button>
+
+                <button
+                  onClick={() =>
+                    useSuggestion("What are the key points in this document?")
+                  }
+                >
+                  <span>⌁</span>
+                  Find the key points
+                </button>
+
+                <button
+                  onClick={() =>
+                    useSuggestion(
+                      "What are the most important skills mentioned?"
+                    )
+                  }
+                >
+                  <span>◈</span>
+                  Find important details
+                </button>
+
+                <button
+                  onClick={() =>
+                    useSuggestion("Explain this document in simple words")
+                  }
+                >
+                  <span>✧</span>
+                  Explain simply
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="messages-container">
+            {messages.map((m, i) => (
+              <ChatMessage
+                key={i}
+                role={m.role}
+                content={m.content}
+                sources={m.sources}
+              />
+            ))}
+          </div>
         )}
-        {messages.map((m, i) => (
-          <ChatMessage key={i} role={m.role} content={m.content} sources={m.sources} />
-        ))}
-        {isLoading && <p className="loading-indicator">DocuChat is thinking…</p>}
+
+        {isLoading && (
+          <div className="thinking">
+            <div className="thinking-avatar">✦</div>
+
+            <div className="thinking-content">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <p>DocuChat is thinking...</p>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
       {error && <p className="error-text">{error}</p>}
 
-      <div className="chat-input-row">
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Ask a question…"
-          rows={1}
-        />
-        <button onClick={handleSend} disabled={isLoading || !input.trim()}>
-          Send
-        </button>
+      <div className="chat-input-container">
+        <div className="chat-input-row">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={
+              hasDocuments
+                ? "Ask anything about your documents..."
+                : "Upload a document to start chatting..."
+            }
+            rows={1}
+          />
+
+          <button
+            className="send-button"
+            onClick={handleSend}
+            disabled={isLoading || !input.trim() || !hasDocuments}
+          >
+            ↑
+          </button>
+        </div>
+
+        <p className="input-hint">
+          Press <strong>Enter</strong> to send ·{" "}
+          <strong>Shift + Enter</strong> for a new line
+        </p>
       </div>
     </div>
   );
